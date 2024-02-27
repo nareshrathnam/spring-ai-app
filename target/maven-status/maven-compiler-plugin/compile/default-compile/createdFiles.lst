@@ -1,0 +1,6 @@
+com\demo\springapp\SwaggerConfig.class
+com\demo\springapp\entity\GeneratedImage.class
+com\demo\springapp\SpringAppApplication.class
+com\demo\springapp\controller\SpringAIController.class
+com\demo\springapp\service\SpringAIService.class
+com\demo\springapp\entity\GeneratedImage$ImageUrl.class
