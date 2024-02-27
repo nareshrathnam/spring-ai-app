@@ -23,6 +23,11 @@ public class SpringAIController {
     public String getJoke(@RequestParam String topic) {
         return aiService.getJoke(topic);
     }
+    
+    @GetMapping("/json")
+    public String getJson(@RequestParam String topic) {
+        return aiService.getJson(topic);
+    }
 
     @GetMapping("/book")
     public String getBook(@RequestParam(name = "category") String category, @RequestParam(name = "year") String year) {

@@ -40,6 +40,15 @@ public class SpringAIService {
 		return this.aiClient.generate(promptTemplate.create()).getGeneration().getText();
 	}
 
+	public String getJson(String topic) {
+		PromptTemplate promptTemplate = new PromptTemplate(
+				"""
+						If there are any keywords like 'create', 'project' then make a json with the given project name as 'project' and appropriate description to it as 'project_description' with the given {topic}. generate one-lined description for this
+						""");
+		promptTemplate.add("topic", topic);
+		return this.aiClient.generate(promptTemplate.create()).getGeneration().getText();
+	}
+	
 	public String getBook(String category, String year) {
 		PromptTemplate promptTemplate = new PromptTemplate(
 				"""
