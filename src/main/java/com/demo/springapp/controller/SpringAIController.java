@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.demo.springapp.service.SpringAIService;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -26,7 +28,21 @@ public class SpringAIController {
     
     @GetMapping("/json")
     public String getJson(@RequestParam String topic) {
-        return aiService.getJson(topic);
+        String response1= aiService.getJson(topic);
+        String url = "http://localhost:4444/api/projects";
+        String result;
+        try {
+			HttpResponse<String> response = Unirest.post(url)
+				.header("cache-control", "no-cache")
+				.header("Content-Type", "application/json")
+				.body(response1).asString();
+			result = response.getBody();
+			System.out.println(result);
+			} 
+		catch (Exception e) {
+		}
+		return response1;
+        
     }
 
     @GetMapping("/book")
