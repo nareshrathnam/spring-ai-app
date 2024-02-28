@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.springframework.ai.client.AiClient;
 import org.springframework.ai.client.AiResponse;
 import org.springframework.ai.prompt.PromptTemplate;
@@ -13,11 +14,15 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 
 import com.demo.springapp.entity.GeneratedImage;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
 
 @Service
 public class SpringAIService {
@@ -40,14 +45,40 @@ public class SpringAIService {
 		return this.aiClient.generate(promptTemplate.create()).getGeneration().getText();
 	}
 
-	public String getJson(String topic) {
+	public ResponseEntity<String> getJson(String topic) {
 		PromptTemplate promptTemplate = new PromptTemplate(
 				"""
-						Generate the json, if there are any keywords like 'create' 'project' the given project name as 'projectName' and unique one-lined description to it as 'projectDescription' with the given {topic}. 
+		Generate the json, if there are any keywords like 'create' 'project' the given project name as 'projectName' and one-lined description[RANDOM] to it as 'projectDescription' with the given {topic}. 
 						""");
 		promptTemplate.add("topic", topic);
-		return this.aiClient.generate(promptTemplate.create()).getGeneration().getText();
-	}
+		String generatedJson = this.aiClient.generate(promptTemplate.create()).getGeneration().getText();
+		String url = "http://localhost:4444/api/projects";
+        String result;
+        try {
+			HttpResponse<String> response = Unirest.post(url)
+				.header("cache-control", "no-cache")
+				.header("Content-Type", "application/json")
+				.body(generatedJson).asString();
+			result = response.getBody();
+			System.out.println(result);
+	        JSONObject parsedJson = new JSONObject(response);
+	        String bodyString = parsedJson.getString("body");
+	        JSONObject bodyJson = new JSONObject(bodyString);
+	        String projectName = bodyJson.getString("projectName");
+//	        String projectName = parsedJson.getJSONObject("body").getString("projectName");
+
+	        if (response.getStatus() == 200) {
+	            String successMessage = String.format("Project '%s' created successfully!", projectName);
+	            return ResponseEntity.ok(successMessage);
+	        } else {
+	            String errorMessage = String.format("Error creating project: %s", response.getBody());
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+	        }
+			} 
+        
+		catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());        }
+		}
 	
 	public String getBook(String category, String year) {
 		PromptTemplate promptTemplate = new PromptTemplate(

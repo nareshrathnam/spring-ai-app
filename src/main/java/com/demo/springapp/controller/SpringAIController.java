@@ -27,21 +27,9 @@ public class SpringAIController {
     }
     
     @GetMapping("/json")
-    public String getJson(@RequestParam String topic) {
-        String response1= aiService.getJson(topic);
-        String url = "http://localhost:4444/api/projects";
-        String result;
-        try {
-			HttpResponse<String> response = Unirest.post(url)
-				.header("cache-control", "no-cache")
-				.header("Content-Type", "application/json")
-				.body(response1).asString();
-			result = response.getBody();
-			System.out.println(result);
-			} 
-		catch (Exception e) {
-		}
-		return response1;
+    public ResponseEntity<String> getJson(@RequestParam String topic) {
+        return aiService.getJson(topic);
+        
         
     }
 
